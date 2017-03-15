@@ -1,0 +1,28 @@
+version: '2'
+services:
+  mysql:
+    environment:
+      - MYSQL_DATABASE=wfp
+      - MYSQL_ROOT_PASSWORD=root
+      - TZ=UTC
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    image: mysql
+    volumes:
+      - ./wfp.sql:/docker-entrypoint-initdb.d/wfp.sql
+
+#  waiter:
+#    depends_on:
+#      - mysql
+#    environment:
+#      - mysql_TCP=tcp://mysql:3306
+
+  js:
+    image: node:6-alpine
+    volumes:
+      - ./:/app
+    depends_on:
+      - mysql
+    command: sh -c "cd /app && npm install && ./node_modules/.bin/wait-on tcp:mysql:3306 && node index.js > graph.svg"
